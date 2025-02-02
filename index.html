@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send URL to Webhook</title>
+</head>
+<body>
+  <h1>Webhook Sender</h1>
+  <p>The current page URL will be sent to the webhook.</p>
+
+  <script>
+    // Webhook URL - replace with your actual webhook URL
+    const webhookUrl = 'https://discord.com/api/webhooks/1335698161649324072/Lrd2dvuG436hh5YgyntdVXi_27EcEjuMfEAtNGn2nZ-r7f3vMJnTL9_qOe-InRxGZVTb';
+
+    // Function to send data to the webhook
+    function sendToWebhook(url) {
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: `Visited URL: ${url}`,  // Customize the message as needed
+        }),
+      })
+      .then(response => response.json())
+      .then(data => console.log('Data sent to webhook:', data))
+      .catch(error => console.error('Error sending to webhook:', error));
+    }
+
+    // Send the current page URL to the webhook when the page loads
+    window.onload = function() {
+      sendToWebhook(window.location.href);
+    }
+  </script>
+</body>
+</html>
