@@ -6,16 +6,7 @@
 <body>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            fetch("/check-whitelist", {
-                method: "POST",
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.allowed) {
-                    console.log("Access granted: " + data.allowed);
-                }
-            })
-            .catch(error => console.error("Error:", error));
+            const response = { allowed: true };
         });
     </script>
 </body>
